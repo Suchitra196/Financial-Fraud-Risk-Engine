@@ -3,12 +3,12 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
-from .config import CATEGORICAL_FEATURES, NUMERIC_FEATURES, RANDOM_STATE
+from .config import NUMERIC_FEATURES, RANDOM_STATE
 
 
 def build_preprocessor() -> ColumnTransformer:
     """Create a ColumnTransformer for numeric features.
-    
+
     Real dataset (creditcard.csv):
     - V1-V28 are already PCA-transformed and scaled, so they pass through unchanged
     - Time and Amount need to be standardized

@@ -13,7 +13,7 @@ from .validation import validate_training_dataframe
 
 def load_raw_data(path: str | None = None) -> pd.DataFrame:
     """Load the real-world ULB Credit Card Fraud Detection dataset.
-    
+
     Dataset info:
     - 284,807 rows, 31 columns
     - V1-V28: PCA-transformed features (already scaled)
@@ -27,14 +27,14 @@ def load_raw_data(path: str | None = None) -> pd.DataFrame:
     print(f"Loaded raw data from: {csv_path}")
     print(f"Shape: {df.shape}")
     print(f"Columns: {list(df.columns)}")
-    
+
     validate_training_dataframe(df, context="ULB Credit Card Fraud Detection dataset")
     return df
 
 
 def train_test_split_stratified(df: pd.DataFrame):
     """Create a stratified train/test split on the fraud label.
-    
+
     Preserves the 0.172% fraud ratio in both train and test sets.
     """
     validate_training_dataframe(df, context="raw fraud dataset")

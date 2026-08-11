@@ -90,8 +90,8 @@ def reason_codes_for_row(
     # Unusual transaction time (off-hours: late night or early morning)
     time_seconds = _safe_float(row.get("Time"))
     if time_seconds is not None:
-        # Time is seconds since first transaction in dataset (approximately 24 hours per 86400 seconds)
-        # Rough mapping: divide by 3600 to get "hour-like" value, modulo to get time-of-day
+        # Time is seconds since first transaction in dataset
+        # Roughly: 24 hours per 86400 seconds, divide by 3600 for "hour-like" value
         hour_approx = (time_seconds / 3600) % 24
         if hour_approx <= 5 or hour_approx >= 23:
             reasons.append("Transaction occurred during unusual hours")
@@ -168,6 +168,8 @@ def shap_reason_codes(
     max_reasons: int = 5,
 ) -> list[str]:
     """Convert SHAP values into concise analyst-friendly reason codes."""
+    # Reshape returns tuple[int, ...] but mypy expects tuple[int]
+    # This is safe at runtime; numpy's reshape is correctly dimensioned
     values = np.asarray(list(shap_values), dtype=float).reshape(-1)
     names = np.asarray(list(feature_names), dtype=object).reshape(-1)
 
@@ -175,8 +177,8 @@ def shap_reason_codes(
     if n == 0:
         return ["No SHAP reason codes available"]
 
-    values = values[:n]
-    names = names[:n]
+    values = values[:n]  # type: ignore[assignment]
+    names = names[:n]  # type: ignore[assignment]
 
     order = np.argsort(np.abs(values))[::-1]
     reasons: list[str] = []

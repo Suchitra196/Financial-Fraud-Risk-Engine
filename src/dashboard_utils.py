@@ -84,7 +84,8 @@ def build_model_metadata(
         "threshold_precision": best_threshold.get("precision"),
         "data_note": (
             "Real-world ULB Credit Card Fraud Detection dataset. "
-            "284,807 transactions with 0.172% fraud rate. Models trained with class_weight='balanced'. "
+            "284,807 transactions with 0.172% fraud rate. "
+            "Models trained with class_weight='balanced'. "
             "V1-V28 are PCA-transformed features, Time and Amount are standardized."
         ),
     }

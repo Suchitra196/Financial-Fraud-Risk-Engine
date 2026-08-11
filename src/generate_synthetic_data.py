@@ -91,8 +91,8 @@ def generate_synthetic_fraud_dataset(
 
     # Add false-positive-looking legitimate high-value transactions.
     high_legit = legit_mask & (rng.random(n_samples) < 0.08)
-    amount[high_legit] *= rng.uniform(3.0, 8.0, size=int(high_legit.sum()))
-    amount = np.clip(amount, 2.0, 8_000.0).round(2)
+    amount[high_legit] *= rng.uniform(3.0, 8.0, size=int(high_legit.sum()))  # type: ignore[index]
+    amount = np.clip(amount, 2.0, 8_000.0).round(2)  # type: ignore[assignment]
 
     hour = np.empty(n_samples, dtype=int)
     legit_hour_probs = _normalize_probs(
@@ -179,11 +179,19 @@ def generate_synthetic_fraud_dataset(
     ip_risk_score[noisy_legit] = rng.beta(2.8, 2.2, size=int(noisy_legit.sum()))
 
     low_risk_fraud = fraud_mask & (rng.random(n_samples) < 0.12)
-    device_risk_score[low_risk_fraud] = rng.beta(1.5, 4.5, size=int(low_risk_fraud.sum()))
-    ip_risk_score[low_risk_fraud] = rng.beta(1.5, 4.2, size=int(low_risk_fraud.sum()))
+    device_risk_score[low_risk_fraud] = rng.beta(  # type: ignore[index]
+        1.5, 4.5, size=int(low_risk_fraud.sum())
+    )
+    ip_risk_score[low_risk_fraud] = rng.beta(  # type: ignore[index]
+        1.5, 4.2, size=int(low_risk_fraud.sum())
+    )
 
-    device_risk_score = np.round(np.clip(device_risk_score, 0, 1), 4).astype(float)
-    ip_risk_score = np.round(np.clip(ip_risk_score, 0, 1), 4).astype(float)
+    device_risk_score = np.round(  # type: ignore[assignment]
+        np.clip(device_risk_score, 0, 1), 4
+    ).astype(float)
+    ip_risk_score = np.round(np.clip(ip_risk_score, 0, 1), 4).astype(  # type: ignore[assignment]
+        float
+    )
 
     transaction_type = _sample_by_class(
         rng,

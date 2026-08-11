@@ -88,7 +88,7 @@ def train_and_evaluate() -> dict:
 
     print(f"\n[SAVED] Model to:   {model_path}")
     print(f"[SAVED] Metrics to: {metrics_path}")
-    print(f"\n=== Model Performance (test set) ===")
+    print("\n=== Model Performance (test set) ===")
     print(f"ROC-AUC:           {roc_auc:.4f}")
     print(f"Average precision: {average_precision:.4f}")
     print(f"Brier score:       {brier_score:.4f}")

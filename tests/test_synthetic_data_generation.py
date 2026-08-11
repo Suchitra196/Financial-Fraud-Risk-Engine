@@ -13,16 +13,16 @@ from src.validation import validate_training_dataframe
 
 class SyntheticDataGenerationTests(unittest.TestCase):
     """Tests for synthetic data generation.
-    
+
     NOTE: These tests are legacy. The project now uses the real ULB Credit Card
     Fraud Detection dataset. The synthetic generator is kept for educational
     purposes but is no longer part of the main data pipeline.
-    
+
     To re-enable these tests, you would need to adapt the validation schema
     to accept synthetic data columns or update the generator to produce real
     dataset columns.
     """
-    
+
     @unittest.skip("Project now uses real ULB dataset; synthetic generator kept for reference only")
     def test_generator_returns_valid_training_schema(self) -> None:
         df = generate_synthetic_fraud_dataset(n_samples=600, fraud_rate=0.08, seed=7)
