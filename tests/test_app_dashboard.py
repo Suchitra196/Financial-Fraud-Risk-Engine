@@ -33,17 +33,24 @@ class AppDashboardTests(unittest.TestCase):
 
     def test_explain_single_transaction_end_to_end(self) -> None:
         import matplotlib
+        import pandas as pd
 
         matplotlib.use("Agg")
         import matplotlib.figure
 
         import app
-        from src.config import TARGET_COL
+        from src.config import PROCESSED_DATA_DIR, TARGET_COL
         from src.features import build_pipeline
-        from src.generate_synthetic_data import generate_synthetic_fraud_dataset
         from src.score_new_transactions import score_dataframe
 
-        df = generate_synthetic_fraud_dataset(n_samples=300, fraud_rate=0.2, seed=5)
+        # Use real test data instead of synthetic
+        # Sample both positive and negative examples to ensure both classes are present
+        test_path = PROCESSED_DATA_DIR / "transactions_test.csv"
+        df_all = pd.read_csv(test_path)
+        df_fraud = df_all[df_all[TARGET_COL] == 1].head(50)  # 50 fraud cases
+        df_legit = df_all[df_all[TARGET_COL] == 0].head(250)  # 250 legit cases
+        df = pd.concat([df_fraud, df_legit], ignore_index=True)
+
         X = df.drop(columns=[TARGET_COL])
         y = df[TARGET_COL]
 

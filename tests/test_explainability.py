@@ -4,8 +4,6 @@ import unittest
 
 import numpy as np
 
-from src.config import TARGET_COL
-from src.generate_synthetic_data import generate_synthetic_fraud_dataset
 from src.reason_codes import positive_class_shap_values
 
 try:
@@ -47,14 +45,17 @@ class ShapIntegrationTests(unittest.TestCase):
 
     def test_global_shap_runs_and_writes_figure(self) -> None:
         import matplotlib
+        import pandas as pd
 
         matplotlib.use("Agg")
 
-        from src.config import FIGURES_DIR
+        from src.config import FIGURES_DIR, PROCESSED_DATA_DIR, TARGET_COL
         from src.explain import compute_and_plot_global_shap
         from src.features import build_pipeline
 
-        df = generate_synthetic_fraud_dataset(n_samples=300, fraud_rate=0.2, seed=7)
+        # Use real test data instead of synthetic
+        test_path = PROCESSED_DATA_DIR / "transactions_test.csv"
+        df = pd.read_csv(test_path).head(300)  # Use first 300 real samples for speed
         X = df.drop(columns=[TARGET_COL])
         y = df[TARGET_COL]
 
@@ -72,11 +73,15 @@ class ShapIntegrationTests(unittest.TestCase):
         self.assertTrue(out_path.exists())
 
     def test_single_row_positive_class_shape(self) -> None:
+        import pandas as pd
         import scipy.sparse as sp
 
+        from src.config import PROCESSED_DATA_DIR, TARGET_COL
         from src.features import build_pipeline
 
-        df = generate_synthetic_fraud_dataset(n_samples=300, fraud_rate=0.2, seed=11)
+        # Use real test data instead of synthetic
+        test_path = PROCESSED_DATA_DIR / "transactions_test.csv"
+        df = pd.read_csv(test_path).head(300)  # Use first 300 real samples for speed
         X = df.drop(columns=[TARGET_COL])
         y = df[TARGET_COL]
 
