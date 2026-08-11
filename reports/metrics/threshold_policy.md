@@ -12,11 +12,10 @@ This file summarizes candidate decision thresholds for fraud-risk review.
 
 | Policy | Threshold | Precision | Recall | FPR | Flagged rate | Cost | Rationale |
 |---|---:|---:|---:|---:|---:|---:|---|
-| cost_optimized | 0.300 | 0.514 | 0.961 | 0.112 | 0.206 | 100.000 | Minimizes expected business cost under the configured false-positive and false-negative costs. |
-| balanced_f1 | 0.450 | 0.650 | 0.870 | 0.058 | 0.147 | 136.000 | Maximizes F1 to balance precision and recall. |
-| high_recall | 0.300 | 0.514 | 0.961 | 0.112 | 0.206 | 100.000 | Maintains recall of at least 95% while minimizing cost. |
-| high_precision | 0.550 | 0.725 | 0.753 | 0.035 | 0.114 | 212.000 | Maintains precision of at least 70% while preserving as much recall as possible. |
-| review_capacity | 0.600 | 0.750 | 0.662 | 0.027 | 0.097 | 277.000 | Keeps the flagged/review rate at or below 10%. |
+| cost_optimized | 0.500 | 0.677 | 0.857 | 0.001 | 0.002 | 180.000 | Minimizes expected business cost under the configured false-positive and false-negative costs. |
+| balanced_f1 | 0.650 | 0.837 | 0.786 | 0.000 | 0.002 | 225.000 | Maximizes F1 to balance precision and recall. |
+| high_precision | 0.550 | 0.741 | 0.816 | 0.000 | 0.002 | 208.000 | Maintains precision of at least 70% while preserving as much recall as possible. |
+| review_capacity | 0.500 | 0.677 | 0.857 | 0.001 | 0.002 | 180.000 | Keeps the flagged/review rate at or below 10%. |
 
 ## Notes
 

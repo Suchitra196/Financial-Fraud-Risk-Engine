@@ -20,3 +20,12 @@ env/
 .DS_Store
 .idea/
 .vscode/
+
+# Large data files (>100MB)
+data/raw/creditcard.csv
+data/processed/transactions_train.csv
+data/processed/transactions_test.csv
+data/processed/transactions_test_scored.csv
+*.csv.gz
+
+

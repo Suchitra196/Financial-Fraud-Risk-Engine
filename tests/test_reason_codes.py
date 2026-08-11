@@ -16,16 +16,16 @@ from src.reason_codes import (
 
 class ReasonCodeTests(unittest.TestCase):
     def _demo_scored(self) -> pd.DataFrame:
+        """Create demo scored data with real dataset columns."""
         return pd.DataFrame(
             {
-                "transaction_id": [1, 2, 3],
-                "amount": [25.0, 900.0, 80.0],
-                "hour": [12, 2, 23],
-                "device_risk_score": [0.10, 0.92, 0.65],
-                "ip_risk_score": [0.08, 0.88, 0.70],
-                "transaction_type": ["purchase", "transfer", "purchase"],
-                "merchant_category": ["grocery", "crypto", "retail"],
-                "country": ["DE", "RU", "FR"],
+                "Time": [0, 3600, 7200],
+                "V1": [-1.36, 0.45, -0.55],
+                "V3": [-0.42, 0.32, -0.12],
+                "V4": [0.08, -0.12, 0.54],
+                "V10": [0.5, -0.3, 0.2],
+                "V14": [0.4, -0.2, 0.3],
+                "Amount": [25.0, 900.0, 80.0],
                 "fraud_probability": [0.05, 0.97, 0.55],
                 "fraud_flag": [0, 1, 1],
             }
@@ -47,8 +47,6 @@ class ReasonCodeTests(unittest.TestCase):
 
         joined = " | ".join(reasons).lower()
         self.assertIn("critical model risk", joined)
-        self.assertIn("device risk", joined)
-        self.assertIn("ip risk", joined)
         self.assertIn("amount", joined)
 
     def test_add_reason_codes_adds_string_column(self) -> None:
@@ -60,28 +58,28 @@ class ReasonCodeTests(unittest.TestCase):
 
     def test_humanize_feature_name_handles_transformed_names(self) -> None:
         self.assertEqual(
-            humanize_feature_name("numeric__device_risk_score"),
-            "device risk score",
+            humanize_feature_name("numeric__V1"),
+            "V1 (PCA component 1)",
         )
         self.assertEqual(
-            humanize_feature_name("categorical__merchant_category_crypto"),
-            "merchant category = crypto",
+            humanize_feature_name("numeric__Amount"),
+            "transaction amount",
         )
 
     def test_shap_reason_codes_use_direction(self) -> None:
         reasons = shap_reason_codes(
             [0.8, -0.4, 0.1],
             [
-                "numeric__device_risk_score",
-                "categorical__transaction_type_purchase",
-                "numeric__amount",
+                "numeric__V1",
+                "numeric__V4",
+                "numeric__Amount",
             ],
             max_reasons=2,
         )
 
         self.assertEqual(len(reasons), 2)
-        self.assertIn("device risk score increased fraud risk", reasons[0])
-        self.assertIn("transaction type = purchase reduced fraud risk", reasons[1])
+        self.assertIn("increased fraud risk", reasons[0])
+        self.assertIn("reduced fraud risk", reasons[1])
 
     def test_split_reason_codes_handles_empty_values(self) -> None:
         self.assertEqual(split_reason_codes(None), [])

@@ -9,13 +9,15 @@ SCORE_COLUMNS = {"fraud_probability", "fraud_flag", "risk_band", "reason_codes"}
 
 
 FRIENDLY_FEATURE_NAMES = {
-    "amount": "transaction amount",
-    "hour": "transaction hour",
-    "device_risk_score": "device risk score",
-    "ip_risk_score": "IP risk score",
-    "transaction_type": "transaction type",
-    "merchant_category": "merchant category",
-    "country": "country signal",
+    # V-features are PCA components; map to their fraud relevance
+    "V1": "V1 (PCA component 1)",
+    "V3": "V3 (PCA component 3)",
+    "V4": "V4 (PCA component 4)",
+    "V10": "V10 (PCA component 10)",
+    "V14": "V14 (PCA component 14)",
+    # Time and Amount
+    "Time": "transaction timestamp",
+    "Amount": "transaction amount",
 }
 
 
@@ -36,10 +38,10 @@ def _safe_str(value) -> str:
 
 def high_amount_cutoff(df: pd.DataFrame, quantile: float = 0.95) -> float | None:
     """Return a robust high-amount cutoff from the current scoring batch."""
-    if "amount" not in df.columns or len(df) == 0:
+    if "Amount" not in df.columns or len(df) == 0:
         return None
 
-    values = pd.to_numeric(df["amount"], errors="coerce").dropna()
+    values = pd.to_numeric(df["Amount"], errors="coerce").dropna()
     if len(values) == 0:
         return None
 
@@ -59,9 +61,11 @@ def reason_codes_for_row(
     obvious risk drivers in the input features and score output. They are not a
     causal explanation and should be reviewed together with SHAP/model evidence.
 
-    Accepts either a pandas Series or a plain mapping (e.g. a row from
-    ``DataFrame.to_dict("records")``); both support ``.get`` so no per-row Series
-    construction is needed.
+    For the real ULB Credit Card Fraud dataset:
+    - Model score is primary indicator
+    - High transaction amount (unusual for this batch)
+    - Unusual transaction time (off-hours)
+    - High anomaly scores in key PCA components (V1, V3, V4, V10, V14)
     """
     reasons: list[str] = []
 
@@ -72,39 +76,25 @@ def reason_codes_for_row(
         elif fraud_probability >= threshold:
             reasons.append("Model score is above the review threshold")
 
-    device_risk = _safe_float(row.get("device_risk_score"))
-    if device_risk is not None:
-        if device_risk >= 0.80:
-            reasons.append("High device risk score")
-        elif device_risk >= 0.60:
-            reasons.append("Elevated device risk score")
+    # Check for high absolute values in key PCA components correlated with fraud
+    for v_component in ["V1", "V3", "V4", "V10", "V14"]:
+        value = _safe_float(row.get(v_component))
+        if value is not None and abs(value) >= 2.5:
+            reasons.append(f"High anomaly score in {v_component}")
 
-    ip_risk = _safe_float(row.get("ip_risk_score"))
-    if ip_risk is not None:
-        if ip_risk >= 0.80:
-            reasons.append("High IP risk score")
-        elif ip_risk >= 0.60:
-            reasons.append("Elevated IP risk score")
-
-    amount = _safe_float(row.get("amount"))
+    # High transaction amount
+    amount = _safe_float(row.get("Amount"))
     if amount is not None and amount_cutoff is not None and amount >= amount_cutoff:
         reasons.append("Transaction amount is high for this batch")
 
-    hour = _safe_float(row.get("hour"))
-    if hour is not None and (hour <= 5 or hour >= 23):
-        reasons.append("Transaction occurred during unusual hours")
-
-    transaction_type = _safe_str(row.get("transaction_type")).lower()
-    if transaction_type in {"transfer", "withdrawal", "wire"}:
-        reasons.append(f"Transaction type '{transaction_type}' is higher risk in the demo data")
-
-    merchant_category = _safe_str(row.get("merchant_category")).lower()
-    if merchant_category in {"crypto", "electronics", "luxury"}:
-        reasons.append(f"Merchant category '{merchant_category}' is higher risk in the demo data")
-
-    country = _safe_str(row.get("country"))
-    if country.upper() in {"RU", "CN"}:
-        reasons.append("Country signal is associated with higher synthetic-demo risk")
+    # Unusual transaction time (off-hours: late night or early morning)
+    time_seconds = _safe_float(row.get("Time"))
+    if time_seconds is not None:
+        # Time is seconds since first transaction in dataset (approximately 24 hours per 86400 seconds)
+        # Rough mapping: divide by 3600 to get "hour-like" value, modulo to get time-of-day
+        hour_approx = (time_seconds / 3600) % 24
+        if hour_approx <= 5 or hour_approx >= 23:
+            reasons.append("Transaction occurred during unusual hours")
 
     if not reasons:
         reasons.append("No strong rule-based risk drivers identified")
@@ -145,13 +135,6 @@ def humanize_feature_name(feature_name: str) -> str:
         if raw.startswith(prefix):
             raw = raw[len(prefix) :]
             break
-
-    # OneHotEncoder feature names often look like: merchant_category_crypto.
-    for base in ["transaction_type", "merchant_category", "country"]:
-        if raw.startswith(base + "_"):
-            value = raw[len(base) + 1 :].replace("_", " ")
-            friendly_base = FRIENDLY_FEATURE_NAMES.get(base, base.replace("_", " "))
-            return f"{friendly_base} = {value}"
 
     return FRIENDLY_FEATURE_NAMES.get(raw, raw.replace("_", " "))
 

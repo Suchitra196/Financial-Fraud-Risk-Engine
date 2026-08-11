@@ -19,36 +19,41 @@ from src.validation import (
 
 class ValidationAndScoringTests(unittest.TestCase):
     def _demo_transactions(self) -> pd.DataFrame:
+        """Create a demo transactions dataframe with real dataset columns."""
         return pd.DataFrame(
             {
-                "transaction_id": range(1, 9),
-                "user_id": [101, 102, 103, 104, 105, 106, 107, 108],
-                "amount": [20.0, 450.0, 35.0, 800.0, 15.0, 900.0, 42.0, 1000.0],
-                "hour": [9, 23, 10, 2, 14, 1, 11, 3],
-                "device_risk_score": [0.05, 0.9, 0.1, 0.85, 0.02, 0.95, 0.07, 0.88],
-                "ip_risk_score": [0.03, 0.8, 0.12, 0.9, 0.04, 0.93, 0.1, 0.86],
-                "transaction_type": [
-                    "purchase",
-                    "transfer",
-                    "purchase",
-                    "transfer",
-                    "purchase",
-                    "transfer",
-                    "purchase",
-                    "transfer",
-                ],
-                "merchant_category": [
-                    "retail",
-                    "crypto",
-                    "grocery",
-                    "electronics",
-                    "retail",
-                    "crypto",
-                    "grocery",
-                    "electronics",
-                ],
-                "country": ["DE", "RU", "DE", "CN", "DE", "RU", "FR", "CN"],
-                TARGET_COL: [0, 1, 0, 1, 0, 1, 0, 1],
+                "Time": [0, 3600, 7200, 10800, 14400, 18000, 21600, 25200],
+                "V1": [-1.3598, 0.4549, -0.5516, 0.3546, -1.4656, 0.2123, -0.8445, 0.1234],
+                "V2": [-0.0727, 1.0145, 0.2357, -0.6789, 0.4321, -0.5432, 0.7654, -0.2341],
+                "V3": [-0.4202, 0.3218, -0.1234, 0.5432, -0.2345, 0.6543, -0.1234, 0.3456],
+                "V4": [0.0846, -0.1235, 0.5432, -0.2341, 0.1234, -0.5432, 0.2341, -0.1234],
+                "V5": [-0.0163, 0.7654, -0.0876, 0.3456, -0.2345, 0.1234, -0.3456, 0.5432],
+                # For simplicity, create remaining V features as zeros
+                "V6": [0.0] * 8,
+                "V7": [0.0] * 8,
+                "V8": [0.0] * 8,
+                "V9": [0.0] * 8,
+                "V10": [0.5, -0.3, 0.2, -0.4, 0.1, -0.5, 0.3, -0.2],
+                "V11": [0.0] * 8,
+                "V12": [0.0] * 8,
+                "V13": [0.0] * 8,
+                "V14": [0.4, -0.2, 0.3, -0.1, 0.2, -0.4, 0.1, -0.3],
+                "V15": [0.0] * 8,
+                "V16": [0.0] * 8,
+                "V17": [0.0] * 8,
+                "V18": [0.0] * 8,
+                "V19": [0.0] * 8,
+                "V20": [0.0] * 8,
+                "V21": [0.0] * 8,
+                "V22": [0.0] * 8,
+                "V23": [0.0] * 8,
+                "V24": [0.0] * 8,
+                "V25": [0.0] * 8,
+                "V26": [0.0] * 8,
+                "V27": [0.0] * 8,
+                "V28": [0.0] * 8,
+                "Amount": [20.0, 450.0, 35.0, 800.0, 15.0, 900.0, 42.0, 1000.0],
+                "Class": [0, 1, 0, 1, 0, 1, 0, 1],
             }
         )
 
@@ -67,8 +72,8 @@ class ValidationAndScoringTests(unittest.TestCase):
 
     def test_invalid_numeric_feature_raises(self) -> None:
         df = self._demo_transactions()
-        df["amount"] = df["amount"].astype(object)
-        df.loc[0, "amount"] = "not-a-number"
+        df["Amount"] = df["Amount"].astype(object)
+        df.loc[0, "Amount"] = "not-a-number"
         with self.assertRaisesRegex(DataValidationError, "invalid numeric"):
             validate_scoring_dataframe(df)
 

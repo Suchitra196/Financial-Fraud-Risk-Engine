@@ -7,7 +7,8 @@ DATA_DIR = PROJECT_ROOT / "data"
 RAW_DATA_DIR = DATA_DIR / "raw"
 PROCESSED_DATA_DIR = DATA_DIR / "processed"
 
-RAW_DATA_PATH = RAW_DATA_DIR / "synthetic_fraud_dataset.csv"
+# Real-world dataset: ULB Credit Card Fraud Detection
+RAW_DATA_PATH = RAW_DATA_DIR / "creditcard.csv"
 
 MODELS_DIR = PROJECT_ROOT / "models"
 REPORTS_DIR = PROJECT_ROOT / "reports"
@@ -19,25 +20,23 @@ for _dir in [RAW_DATA_DIR, PROCESSED_DATA_DIR, MODELS_DIR, REPORTS_DIR, METRICS_
     _dir.mkdir(parents=True, exist_ok=True)
 
 # Column configuration
-TARGET_COL = "is_fraud"
+# Real dataset: Class = 1 is fraud, 0 is non-fraud
+TARGET_COL = "Class"
 
-ID_COLS = ["transaction_id", "user_id"]
-
-CATEGORICAL_FEATURES = [
-    "transaction_type",
-    "merchant_category",
-    "country",
-]
-
+# PCA-transformed features V1-V28 are already scaled; Time and Amount need scaling
 NUMERIC_FEATURES = [
-    "amount",
-    "hour",
-    "device_risk_score",
-    "ip_risk_score",
+    "Time",     # Transaction timestamp (will be scaled)
+    "V1", "V2", "V3", "V4", "V5", "V6", "V7", "V8", "V9", "V10",
+    "V11", "V12", "V13", "V14", "V15", "V16", "V17", "V18", "V19", "V20",
+    "V21", "V22", "V23", "V24", "V25", "V26", "V27", "V28",
+    "Amount",   # Transaction amount (will be scaled)
 ]
 
-# We can optionally include IDs as numeric features; here we keep them separate
-FEATURE_COLS = NUMERIC_FEATURES + CATEGORICAL_FEATURES + ID_COLS
+# No categorical features in this dataset
+CATEGORICAL_FEATURES = []
+
+# All features for the model
+FEATURE_COLS = NUMERIC_FEATURES + CATEGORICAL_FEATURES
 
 # Train/test split
 TEST_SIZE = 0.2

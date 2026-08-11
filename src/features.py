@@ -1,16 +1,21 @@
 from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.preprocessing import StandardScaler
 
 from .config import CATEGORICAL_FEATURES, NUMERIC_FEATURES, RANDOM_STATE
 
 
 def build_preprocessor() -> ColumnTransformer:
-    """Create a ColumnTransformer for numeric + categorical features."""
+    """Create a ColumnTransformer for numeric features.
+    
+    Real dataset (creditcard.csv):
+    - V1-V28 are already PCA-transformed and scaled, so they pass through unchanged
+    - Time and Amount need to be standardized
+    - No categorical features in this dataset
+    """
     preprocessor = ColumnTransformer(
         transformers=[
-            ("categorical", OneHotEncoder(handle_unknown="ignore"), CATEGORICAL_FEATURES),
             ("numeric", StandardScaler(), NUMERIC_FEATURES),
         ],
         remainder="drop",
@@ -22,7 +27,7 @@ def build_model() -> RandomForestClassifier:
     """
     Build a fraud classifier.
 
-    RandomForest with class_weight='balanced' to handle imbalanced data.
+    RandomForest with class_weight='balanced' to handle imbalanced data (0.172% fraud).
     """
     model = RandomForestClassifier(
         n_estimators=300,

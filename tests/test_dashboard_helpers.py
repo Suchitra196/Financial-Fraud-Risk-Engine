@@ -76,7 +76,7 @@ class DashboardHelperTests(unittest.TestCase):
         self.assertEqual(metadata["roc_auc"], 0.91)
         self.assertEqual(metadata["average_precision"], 0.77)
         self.assertEqual(metadata["brier_score"], 0.08)
-        self.assertIn("synthetic", metadata["data_note"].lower())
+        self.assertIn("real-world", metadata["data_note"].lower())
 
 
 if __name__ == "__main__":

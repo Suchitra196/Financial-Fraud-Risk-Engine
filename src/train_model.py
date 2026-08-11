@@ -34,6 +34,7 @@ def load_processed_data():
 
 
 def train_and_evaluate() -> dict:
+    print("Loading processed training data...")
     train_df, test_df = load_processed_data()
 
     X_train = train_df.drop(columns=[TARGET_COL])
@@ -42,9 +43,11 @@ def train_and_evaluate() -> dict:
     X_test = test_df.drop(columns=[TARGET_COL])
     y_test = test_df[TARGET_COL]
 
+    print(f"\nTraining RandomForest on {len(X_train):,} samples...")
     pipeline = build_pipeline()
     pipeline.fit(X_train, y_train)
 
+    print("Computing predictions on test set...")
     y_proba = pipeline.predict_proba(X_test)[:, 1]
     y_pred_default = (y_proba >= 0.5).astype(int)
 
@@ -69,9 +72,10 @@ def train_and_evaluate() -> dict:
         "positive_rate_train": float(y_train.mean()),
         "positive_rate_test": float(y_test.mean()),
         "note": (
-            "This synthetic demo dataset has overlapping classes and injected label noise. "
-            "Probability metrics should be interpreted as workflow checks, not real-world "
-            "fraud benchmark performance."
+            "Trained on the real-world ULB Credit Card Fraud Detection dataset. "
+            "284,807 transactions with 0.172% fraud rate. "
+            "V1-V28 are PCA-transformed features. Time and Amount are scaled. "
+            "Class imbalance handled via class_weight='balanced' in RandomForest."
         ),
     }
 
@@ -82,18 +86,21 @@ def train_and_evaluate() -> dict:
     with metrics_path.open("w") as f:
         json.dump(metrics, f, indent=2)
 
-    print(f"Saved model to:   {model_path}")
-    print(f"Saved metrics to: {metrics_path}")
-    print(f"ROC-AUC (test): {roc_auc:.4f}")
-    print(f"Average precision (test): {average_precision:.4f}")
-    print(f"Brier score (test): {brier_score:.4f}")
+    print(f"\n[SAVED] Model to:   {model_path}")
+    print(f"[SAVED] Metrics to: {metrics_path}")
+    print(f"\n=== Model Performance (test set) ===")
+    print(f"ROC-AUC:           {roc_auc:.4f}")
+    print(f"Average precision: {average_precision:.4f}")
+    print(f"Brier score:       {brier_score:.4f}")
+    print(f"\nPositive rate (train): {y_train.mean():.4%}")
+    print(f"Positive rate (test):  {y_test.mean():.4%}")
 
     return metrics
 
 
 def main() -> None:
     metrics = train_and_evaluate()
-    print("\n=== Metrics summary ===")
+    print("\n=== Full metrics summary ===")
     print(json.dumps(metrics, indent=2))
 
 
