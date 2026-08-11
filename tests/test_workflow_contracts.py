@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import unittest
 
 import numpy as np
@@ -13,8 +14,16 @@ from src.data_prep import load_raw_data, train_test_split_stratified
 from src.evaluate import compute_threshold_metrics, pick_best_threshold
 from src.features import build_pipeline
 
+RAW_DATA_PATH = "data/raw/creditcard.csv"
 
+
+@unittest.skipUnless(
+    os.path.exists(RAW_DATA_PATH),
+    "Skipping: creditcard.csv not present (expected in CI — download locally to run)",
+)
 class WorkflowContractTests(unittest.TestCase):
+    """Tests requiring the real ULB creditcard.csv dataset."""
+
     def test_raw_data_has_expected_columns_and_binary_target(self) -> None:
         df = load_raw_data()
 
@@ -57,6 +66,10 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertTrue(np.isfinite(proba).all())
         self.assertTrue(((proba >= 0.0) & (proba <= 1.0)).all())
 
+
+class ThresholdMetricsTests(unittest.TestCase):
+    """Tests that don't require external data."""
+
     def test_threshold_metrics_have_valid_values(self) -> None:
         y_true = np.array([0, 0, 1, 1])
         y_proba = np.array([0.05, 0.30, 0.70, 0.95])
@@ -79,3 +92,4 @@ class WorkflowContractTests(unittest.TestCase):
             self.assertGreaterEqual(row["recall"], 0.0)
             self.assertLessEqual(row["recall"], 1.0)
             self.assertGreaterEqual(row["cost"], 0.0)
+
